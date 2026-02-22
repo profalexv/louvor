@@ -13,14 +13,32 @@ const ControlPanel = () => {
     populateInitialData();
   }, []);
 
-  const openProjector = () => {
-    window.open('/projector', 'ProjectorWindow', 'width=800,height=600,menubar=no,toolbar=no');
+  const openProjector = async () => {
+    let params = 'width=800,height=600,menubar=no,toolbar=no';
+
+    // Tenta usar a API moderna de Multi-Telas (Chrome/Edge)
+    if ('getScreenDetails' in window) {
+      try {
+        const screenDetails = await window.getScreenDetails();
+        // Procura um monitor que não seja o atual (o monitor estendido/projetor)
+        const projectorScreen = screenDetails.screens.find(s => s !== screenDetails.currentScreen);
+        
+        if (projectorScreen) {
+          params = `left=${projectorScreen.left},top=${projectorScreen.top},width=${projectorScreen.width},height=${projectorScreen.height},menubar=no,toolbar=no,fullscreen=yes`;
+        }
+      } catch (err) {
+        console.log('Permissão de gerenciamento de janelas não concedida ou API não suportada.');
+      }
+    }
+
+    window.open('/projector', 'ProjectorWindow', params);
   };
 
   // Divide a música em slides baseados em parágrafos duplos
   const getSlides = (content) => {
     if (!content) return [];
-    return content.split('\n\n');
+    // Usa Regex para dividir por 2 ou mais quebras de linha (funciona em Windows/Linux/Mac)
+    return content.split(/\n\s*\n/);
   };
 
   return (
@@ -31,6 +49,9 @@ const ControlPanel = () => {
         <div className="flex gap-2">
           <button onClick={clearScreen} className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded font-bold">
             BLACK (F5)
+          </button>
+          <button onClick={() => sendSlide({ text: "TESTE DE PROJEÇÃO\n\nSe você lê isso, funciona!" })} className="bg-yellow-500 hover:bg-yellow-600 px-4 py-2 rounded font-bold text-black">
+            Testar
           </button>
           <button onClick={openProjector} className="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded font-bold">
             Abrir Projetor
