@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PromptSong - Conectar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #1a1a1a;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .status {
+            background: #f0f0f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .status.connecting {
+            background: linear-gradient(135deg, #fff9c410 0%, #ffd70010 100%);
+            border: 2px solid #ffd700;
+        }
+
+        .status.connected {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            border: 2px solid #28a745;
+        }
+
+        .status.error {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            border: 2px solid #dc3545;
+        }
+
+        .status-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-text {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-detail {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-box {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #1a1a1a;
+        }
+
+        .info-box p {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0.5rem 0;
+        }
+
+        .code {
+            font-family: monospace;
+            background: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            word-break: break-all;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .instructions {
+            margin-top: 2rem;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .instructions h3 {
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .instructions ol {
+            margin-left: 1.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 PromptSong</h1>
+            <p>Conectando a sessão remota...</p>
+        </div>
+
+        <div id="status" class="status connecting">
+            <div class="spinner"></div>
+            <div class="status-text">Conectando ao servidor...</div>
+            <div class="status-detail" id="status-detail">Aguarde alguns momentos</div>
+        </div>
+
+        <div id="server-info" class="info-box" style="display: none;">
+            <h3>📍 Servidor</h3>
+            <p>IP: <span class="code" id="server-ip">-</span></p>
+            <p>Porta: <span class="code" id="server-port">-</span></p>
+            <p>Papel: <span class="code" id="server-role">Aguardando...</span></p>
+        </div>
+
+        <div id="error-box" style="display: none;">
+            <div class="info-box" style="border-left-color: #dc3545;">
+                <h3>❌ Erro na Conexão</h3>
+                <p id="error-message">-</p>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="retryConnection()">🔄 Tentar Novamente</button>
+                <button class="btn btn-secondary" onclick="goHome()">🏠 Voltar</button>
+            </div>
+        </div>
+
+        <div id="success-info" style="display: none;">
+            <div class="info-box" style="border-left-color: #28a745; background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);">
+                <h3>✓ Conectado com Sucesso</h3>
+                <p>Você está conectado e pronto para receber conteúdo.</p>
+            </div>
+
+            <div class="instructions">
+                <h3>Como usar</h3>
+                <ol>
+                    <li>Mantenha esta aba aberta</li>
+                    <li>No computador principal, atribua um papel a este monitor (Preview, Projeção, etc)</li>
+                    <li>O conteúdo será sincronizado automaticamente</li>
+                    <li>Minimize ou redimensione conforme necessário</li>
+                </ol>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-secondary" onclick="goHome()">🏠 Voltar</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            PromptSong © 2026 - Monitor Remoto
+        </div>
+    </div>
+
+    <script src="js/connector.js"></script>
+</body>
+</html>
